@@ -26,6 +26,7 @@ group :development, :test do
 end
 
 group :development do
+  gem 'guard-rspec', '~>4.7', require: false
   gem 'rubocop', '~> 1.56', require: false
   gem 'rubocop-capybara', '~> 2.18', require: false
   gem 'rubocop-factory_bot', '~> 2.23', require: false
