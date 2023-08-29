@@ -6,12 +6,12 @@ if [ "$?" = "127" ] ; then
   alias docker-compose="docker compose"
 fi
 
-if [ -n "$(docker ps -f name=schola-app | grep -w 'Up' | awk '{print $NF}')" ]; then
+if [ -n "$(docker ps -f name=schola | grep -w 'Up' | awk '{print $NF}')" ]; then
   echo "Re-Using Existing Container..."
-  CMD="docker exec -it schola-app bash -c '$@'"
+  CMD="docker exec -it schola bash -c '$@'"
 else
   echo "Creating New Container..."
-  CMD="docker-compose run --name schola_tmp --rm schola-app bash -c 'bundle install && bundle exec rails db:setup && $@'"
+  CMD="docker-compose run --name schola_tmp --rm schola bash -c 'bundle install && bundle exec rails db:setup && $@'"
 fi
 echo $CMD
 eval $CMD
