@@ -1,29 +1,30 @@
 # frozen_string_literal: true
 
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
-#   Character.create(name: "Luke", movie: movies.first)
+require 'logger'
+logger = ActiveSupport::TaggedLogging.new(Logger.new($stdout))
 
 last_ten_years = (2012..2023)
 students_per_class = rand(20..40)
 
-students = FactoryBot.create_list :student, 20
+logger.tagged('STUDENTS') { logger.info 'Creating Students' }
+students = FactoryBot.create_list :student, 300
+
+logger.tagged('SUBJECTS') { logger.info 'Creating Subjects' }
 subjects = FactoryBot.create_list :subject, 7
-teachers = FactoryBot.create_list :teacher, 100
+
+logger.tagged('TEACHERS') { logger.info 'Creating Teachers' }
+teachers = FactoryBot.create_list :teacher, 25
 
 class_names = (5..9) # nth grade
 
 last_ten_years.each do |year|
   class_names.each do |n|
+    logger.tagged("YEAR=#{year}") { logger.info "Creating Classes for #{n}th grade" }
     course = FactoryBot.create(:course, year:, name: "#{n}th grade")
-
     course_teachers = teachers.sample(subjects.size).zip(subjects)
+
     course_teachers.each do |teacher, subject|
-      TeacherAssignment.create(course:, subject:, teacher:)
+      FactoryBot.create(:teacher_assignment, course:, subject:, teacher:)
 
       students.take(students_per_class).each do |student|
         enrollment = FactoryBot.create(:enrollment, student:, course:)
