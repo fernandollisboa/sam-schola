@@ -1,42 +1,27 @@
 # frozen_string_literal: true
 
 class StudentsController < ApplicationController
-  before_action :set_student, only: %i[show edit update destroy]
-  before_action :set_year, only: %i[index, show]
+  before_action :set_student, only: %i[edit update destroy]
+  before_action :set_year, only: %i[index show]
 
   def index
-    @students = Student.all
+    @students = Student.yearly_reports(year: @year)
+
+    if @students.empty?
+      flash[:notice] = "No Enrollments for the Current Year (#{@year})"
+    end
   end
 
   def show
-    @student = Student.resume(id: params[:id], year: @year)
-    .select(
-      :id,
-      :name,
-      :born_on,
-      "enrollments.code AS enrollment_code",
-      "courses.name AS course_name",
-      "AVG(grades.value) AS grades_average"
-    ).first
+    begin
+      @student = Student.yearly_reports(year: @year).grade_averages.find(params[:id])
+      @grades = Grade.yearly_averages_by_subject(year: @year).find_by_student_id(id: params[:id])
 
-    @grades = Grade.joins(enrollment: [:student, :course], exam: [:subject])
-    .where(course: { year: @year }, student: { id: 1 })
-    .select(
-      'subjects.name AS subject_name',
-      'enrollments.code AS enrollment_code',
-      'enrollments.code AS code',
-      'student.name AS student_name',
-      'course.year',
-      'AVG(grades.value) AS average',
-      'course.name AS course_name'
-    ).group('course.year', 'subjects.name', 'student.name', 'enrollments.code', 'course.name')
-
-
-    @enrollment_code = @student&.enrollment_code
-    @course_name = @student&.course_name
-    @grades_average = @student&.grades_average
-
-    if @student.nil?
+      @enrollment_code = @student.enrollment_code
+      @course_name = @student.course_name
+      @grades_average = @student.grades_average
+    rescue ActiveRecord::RecordNotFound
+      flash[:notice] = "No Enrollment for the Current Year (#{@year})"
       set_student
     end
   end
