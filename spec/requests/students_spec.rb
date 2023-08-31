@@ -26,10 +26,71 @@ RSpec.describe '/students' do
   end
 
   describe 'GET /show' do
+
     it 'renders a successful response' do
       student = Student.create! valid_attributes
       get student_url(student)
       expect(response).to be_successful
+    end
+
+    context 'when not passing optional params "year"' do
+      let!(:student) { create(:student) }
+      let!(:course) { create(:course, year: Date.current.year) }
+      let!(:enrollment) { create(:enrollment, course:, student:) }
+      let!(:exams) { create_pair(:exam, course:) }
+      let!(:grades) { exams.map { |e| create(:grade, enrollment:, exam: e) } }
+
+      it "renders the student's enrollment code for the current year" do
+        get student_url(student)
+
+        expect(response.body).to include("#{enrollment.code}")
+      end
+
+      it "renders the student's course for the current year" do
+        get student_url(student)
+
+        expect(response.body).to include("#{course.name}")
+      end
+
+      it "renders the student's grade point average for the current year" do
+        get student_url(student)
+        expected_gpa = grades.pluck(:value).sum.to_f / grades.size
+
+        expect(response.body).to include("#{expected_gpa.truncate(2)}")
+      end
+    end
+
+    context 'when passing optional params "year"' do
+      let!(:student) { create(:student) }
+      let!(:course) { create(:course, year:) }
+      let!(:enrollment) { create(:enrollment, course:, student:) }
+      let!(:exams) { create_pair(:exam, course:) }
+      let!(:grades) { exams.map { |exam| create(:grade, enrollment:, exam:) } }
+      let(:year) { 2012 }
+
+      let!(:other_course) { create(:course, year: 2013)}
+      let!(:other_enrollment) { create(:enrollment, course: other_course, student:) }
+      let!(:other_exams) { create_pair(:exam, course: other_course) }
+      let!(:other_grades) { other_exams.map { |exam| create(:grade, enrollment: other_enrollment, exam:, value: 0) } }
+
+      it "renders the student's enrollment code for the selected year" do
+        get "/students/#{student.id}?year=#{year}"
+
+        expect(response.body).to include("#{enrollment.code}")
+      end
+
+      it "renders the student's course for the selected year" do
+        get "/students/#{student.id}?year=#{year}"
+
+        expect(response.body).to include("#{course.name}")
+      end
+
+      it "renders the student's grade point average for the selected year" do
+        get "/students/#{student.id}?year=#{year}"
+        expected_gpa = grades.pluck(:value).sum.to_f / grades.size
+
+        expect(response.body).to include("#{expected_gpa.truncate(2)}")
+      end
     end
   end
 
