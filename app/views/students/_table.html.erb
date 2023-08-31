@@ -18,8 +18,8 @@
             <td class="border px-8 py-4 w-full whitespace-nowrap"><%= student.name %></td>
             <td class="border px-8 py-4 whitespace-nowrap"><%= student&.course_name || '-' %></td>
             <td class="border px-8 py-4 whitespace-nowrap">
-              <%= link_to 'Show', student, class: "rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
-              <%= link_to 'Edit', edit_student_path(student), class: "rounded-lg py-3 ml-2 px-5 bg-gray-100 inline-block font-medium" %>
+              <%= link_to 'Show', student_path(student.id), class: "rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+              <%= link_to 'Edit', edit_student_path(student.id), class: "rounded-lg py-3 ml-2 px-5 bg-gray-100 inline-block font-medium" %>
             </td>
           </tr>
         <% end %>
