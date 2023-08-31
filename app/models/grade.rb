@@ -7,21 +7,21 @@ class Grade < ApplicationRecord
   belongs_to :exam
   belongs_to :enrollment, foreign_key: :enrollment_code, inverse_of: :grades
 
-  scope :yearly_averages_by_subject, ->(year:) do
-    joins(enrollment: [:student, :course], exam: [:subject])
-    .where(course: { year: })
-    .select(
-      'subjects.name AS subject_name',
-      'enrollments.code AS enrollment_code',
-      'enrollments.code AS code',
-      'student.name AS student_name',
-      'course.year',
-      'AVG(grades.value) AS average',
-      'course.name AS course_name'
-    ).group('course.year', 'subjects.name', 'student.name', 'enrollments.code', 'course.name')
-  end
+  scope :yearly_averages_by_subject, lambda { |year:|
+    joins(enrollment: %i[student course], exam: [:subject])
+      .where(course: { year: })
+      .select(
+        'subjects.name AS subject_name',
+        'enrollments.code AS enrollment_code',
+        'enrollments.code AS code',
+        'student.name AS student_name',
+        'course.year',
+        'AVG(grades.value) AS average',
+        'course.name AS course_name'
+      ).group('course.year', 'subjects.name', 'student.name', 'enrollments.code', 'course.name')
+  }
 
-  scope :find_by_student_id, ->(id:) do
+  scope :find_by_student_id, lambda { |id:|
     where(student: { id: })
-  end
+  }
 end

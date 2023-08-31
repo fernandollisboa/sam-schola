@@ -29,14 +29,14 @@ RSpec.describe '/students' do
       let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: 2012) }
 
       it 'renders the students enrolled for the current year', aggregate_failures: true do
-        get "/students"
+        get '/students'
 
         expect(response.body).to include(students[0].name)
         expect(response.body).to include(students[1].name)
       end
 
       it 'does not render the students enrolled for other years' do
-        get "/students"
+        get '/students'
 
         expect(response.body).not_to include(student_enrolled_for_other_year.name)
       end
@@ -85,9 +85,9 @@ RSpec.describe '/students' do
       let!(:course) { create(:course, year:) }
       let!(:enrollment) { create(:enrollment, course:, student:) }
       let!(:subjects) { create_pair(:subject) }
-      let!(:exams) { subjects.map{ |subject| create(:exam, course:, subject:) }}
+      let!(:exams) { subjects.map { |subject| create(:exam, course:, subject:) } }
       let!(:grades) { exams.map { |exam| create(:grade, enrollment:, exam:) } }
-      let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: year - 1)}
+      let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: year - 1) }
       let(:expected_subject_averages) do
         subjects.map do |subject|
           subject_exams = exams.find_all { |exam| exam.subject_id == subject.id }
@@ -100,29 +100,29 @@ RSpec.describe '/students' do
       it "renders the student's enrollment code for the current year" do
         get student_url(student)
 
-        expect(response.body).to include("#{enrollment.code}")
+        expect(response.body).to include(enrollment.code.to_s)
       end
 
       it "renders the student's course for the current year" do
         get student_url(student)
 
-        expect(response.body).to include("#{course.name}")
+        expect(response.body).to include(course.name.to_s)
       end
 
       it "renders the student's grade point average for the current year" do
         get student_url(student)
         expected_gpa = grades.pluck(:value).sum.to_f / grades.size
 
-        expect(response.body).to include("#{expected_gpa.truncate(2)}")
+        expect(response.body).to include(expected_gpa.truncate(2).to_s)
       end
 
       it "renders the student's average for each subject in the current year", aggregate_failures: true do
         get "/students/#{student.id}"
 
-        expect(response.body).to include("#{subjects[0].name}", )
-        expect(response.body).to include("#{subjects[1].name}")
-        expect(response.body).to include("#{expected_subject_averages[0].truncate(2)}")
-        expect(response.body).to include("#{expected_subject_averages[1].truncate(2)}")
+        expect(response.body).to include(subjects[0].name.to_s)
+        expect(response.body).to include(subjects[1].name.to_s)
+        expect(response.body).to include(expected_subject_averages[0].truncate(2).to_s)
+        expect(response.body).to include(expected_subject_averages[1].truncate(2).to_s)
       end
     end
 
@@ -132,9 +132,9 @@ RSpec.describe '/students' do
       let!(:course) { create(:course, year:) }
       let!(:enrollment) { create(:enrollment, course:, student:) }
       let!(:subjects) { create_pair(:subject) }
-      let!(:exams) { subjects.map{ |subject| create(:exam, course:, subject:) }}
+      let!(:exams) { subjects.map { |subject| create(:exam, course:, subject:) } }
       let!(:grades) { exams.map { |exam| create(:grade, enrollment:, exam:) } }
-      let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: year - 1)}
+      let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: year - 1) }
       let(:expected_subject_averages) do
         subjects.map do |subject|
           subject_exams = exams.find_all { |exam| exam.subject_id == subject.id }
@@ -147,13 +147,13 @@ RSpec.describe '/students' do
       it "renders the student's enrollment code for the selected year" do
         get "/students/#{student.id}?year=#{year}"
 
-        expect(response.body).to include("#{enrollment.code}")
+        expect(response.body).to include(enrollment.code.to_s)
       end
 
       it "renders the student's course for the selected year" do
         get "/students/#{student.id}?year=#{year}"
 
-        expect(response.body).to include("#{course.name}")
+        expect(response.body).to include(course.name.to_s)
       end
 
       it "renders the student's grade point average for the selected year" do
@@ -161,16 +161,16 @@ RSpec.describe '/students' do
 
         expected_grade_average = grades.pluck(:value).sum.to_f / grades.size
 
-        expect(response.body).to include("#{expected_grade_average.truncate(2)}")
+        expect(response.body).to include(expected_grade_average.truncate(2).to_s)
       end
 
       it "renders the student's average for each subject in the selected year", aggregate_failures: true do
         get "/students/#{student.id}?year=#{year}"
 
-        expect(response.body).to include("#{subjects[0].name}", )
-        expect(response.body).to include("#{subjects[1].name}")
-        expect(response.body).to include("#{expected_subject_averages[0].truncate(2)}")
-        expect(response.body).to include("#{expected_subject_averages[1].truncate(2)}")
+        expect(response.body).to include(subjects[0].name.to_s)
+        expect(response.body).to include(subjects[1].name.to_s)
+        expect(response.body).to include(expected_subject_averages[0].truncate(2).to_s)
+        expect(response.body).to include(expected_subject_averages[1].truncate(2).to_s)
       end
     end
   end
