@@ -16,11 +16,6 @@
       <%= @course_name || '-' %>
     </p>
 
-    <p>
-      <strong>Average:</strong>
-      <%= @grades_average&.truncate(2) || '-' %>
-    </p>
-
     <p class="my-5">
       <strong class="block font-medium mb-1">Grades:</strong>
       <%= render 'student_grades/table', grades: @grades || [] %>
