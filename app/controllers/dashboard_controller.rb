@@ -6,7 +6,7 @@ class DashboardController < ApplicationController
   def show
     @enrollments_by_course = Course.select_basic_fields.enrollments_count.by_year(year).order(name: :desc)
     @youngest_student_by_course = Student.youngest_by_course.by_year(year).order_by_course_name
-    @best_grades_by_subject = []
+    @best_grades_by_subject =  Grade.best_values_by_subject(year:)
     @top_overloaded_teachers = []
   end
 

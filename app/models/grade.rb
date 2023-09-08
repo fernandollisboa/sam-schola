@@ -20,9 +20,9 @@ class Grade < ApplicationRecord
 
   scope :by_year, lambda { |year|
     joins(enrollment: :course)
-      .where(course: { year: })
-      .select('course.year')
-      .group('course.year')
+      .where("courses.year = #{year}")
+      .select('courses.year')
+      .group('courses.year')
   }
 
   scope :grouped_by_subjects, lambda {
@@ -43,8 +43,36 @@ class Grade < ApplicationRecord
       .group('enrollments.code')
   }
 
-  scope :find_by_student_id, lambda { |id|
+  scope :best_value, lambda {
+    select('MAX(grades.value) AS best_grade')
+  }
+
+  scope :grouped_by_students, lambda {
     joins(enrollment: :student)
-      .where(student: { id: })
+      .select('students.name AS student_name')
+      .group('students.id')
+  }
+
+  scope :grouped_by_subjects, lambda {
+    joins(exam: :subject)
+      .select('subjects.name AS subject_name')
+      .group('subjects.id')
+  }
+
+  scope :grouped_by_courses, lambda {
+    joins(enrollment: :course)
+      .select('courses.name AS course_name', 'courses.year')
+      .group('courses.id')
+  }
+
+  scope :best_values_by_subject, lambda { |year:|
+    joins(enrollment: :course, exam: :subject)
+      .best_value
+      .grouped_by_courses
+      .grouped_by_subjects
+      .grouped_by_students
+      .where("(subjects.name, grades.value, courses.year) IN (#{Exam.best_grades_per_subject.grouped_by_year.to_sql})")
+      .by_year(year)
+      .order('subjects.name ASC')
   }
 end
