@@ -7,10 +7,4 @@ class Student < ApplicationRecord
 
   has_many :enrollments, dependent: :destroy
   has_many :grades, through: :enrollments
-
-  scope :resume, ->(id:, year:) do
-    joins(enrollments: [:course, :grades])
-    .where(id:, courses: { year: } )
-    .group('enrollments.code', 'courses.name', 'students.id')
-  end
 end
