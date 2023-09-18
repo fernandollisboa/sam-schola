@@ -5,25 +5,9 @@
     <% end %>
 
     <%= render @student %>
-
-    <p>
-      <strong>Enrollment:</strong>
-      <%= @enrollment_code || '-' %>
-    </p>
-
-    <p>
-      <strong>Course:</strong>
-      <%= @course_name || '-' %>
-    </p>
-
-    <p>
-      <strong>Average:</strong>
-      <%= @grades_average&.truncate(2) || '-' %>
-    </p>
-
     <p class="my-5">
       <strong class="block font-medium mb-1">Grades:</strong>
-      <%= render 'student_grades/table', grades: @grades %>
+      <%= render 'grades/table', grades: @student.grades %>
     </p>
 
     <%= link_to 'Edit this student', edit_student_path(@student), class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
