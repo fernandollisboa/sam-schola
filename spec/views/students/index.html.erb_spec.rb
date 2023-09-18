@@ -7,7 +7,7 @@ RSpec.describe 'students/index' do
 
   before do
     student_attrs = students.map do |student|
-      OpenStruct.new(**student.attributes, course_year: 2042, enrollment_code: 42, course_name: 42, persisted?: true)
+      OpenStruct.new **student.attributes, course_year: 2042, enrollment_code: 42, course_name: 42, persisted?: true
     end
 
     assign(:students, student_attrs)

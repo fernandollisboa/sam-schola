@@ -7,21 +7,23 @@ class StudentsController < ApplicationController
   def index
     @students = Student.yearly_reports(year: @year)
 
-    return unless @students.empty?
-
-    flash[:notice] = "No Enrollments for the Current Year (#{@year})"
+    if @students.empty?
+      flash[:notice] = "No Enrollments for the Current Year (#{@year})"
+    end
   end
 
   def show
-    @student = Student.yearly_reports(year: @year).grade_averages.find(params[:id])
-    @grades = Grade.yearly_averages_by_subject(year: @year).find_by_student_id(id: params[:id])
+    begin
+      @student = Student.yearly_reports(year: @year).grade_averages.find(params[:id])
+      @grades = Grade.yearly_averages_by_subject(year: @year).find_by_student_id(id: params[:id])
 
-    @enrollment_code = @student.enrollment_code
-    @course_name = @student.course_name
-    @grades_average = @student.grades_average
-  rescue ActiveRecord::RecordNotFound
-    flash[:notice] = "No Enrollment for the Current Year (#{@year})"
-    set_student
+      @enrollment_code = @student.enrollment_code
+      @course_name = @student.course_name
+      @grades_average = @student.grades_average
+    rescue ActiveRecord::RecordNotFound
+      flash[:notice] = "No Enrollment for the Current Year (#{@year})"
+      set_student
+    end
   end
 
   def new
