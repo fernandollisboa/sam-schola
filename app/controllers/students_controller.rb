@@ -5,26 +5,23 @@ class StudentsController < ApplicationController
   before_action :set_year, only: %i[index show]
 
   def index
-    @students = Student.select_basic_fields.enrolled_courses.by_year(year)
+    @students = Student.yearly_reports(year: @year)
 
     return unless @students.empty?
 
-    flash[:notice] = "No Enrollments for the Current Year (#{year})"
+    flash[:notice] = "No Enrollments for the Current Year (#{@year})"
   end
 
   def show
-    @grades = FindStudentGradesAverages.call(student_id: params[:id], year: @year)
+    @student = Student.yearly_reports(year: @year).grade_averages.find(params[:id])
+    @grades = Grade.yearly_averages_by_subject(year: @year).find_by_student_id(id: params[:id])
 
-    if @grades.empty?
-      flash[:notice] = "No Enrollment for the Current Year (#{year})"
-      set_student
-    else
-      enrollment = @grades.take.enrollment
-
-      @student = enrollment.student
-      @enrollment_code = enrollment.code
-      @course_name = @grades.take.course_name
-    end
+    @enrollment_code = @student.enrollment_code
+    @course_name = @student.course_name
+    @grades_average = @student.grades_average
+  rescue ActiveRecord::RecordNotFound
+    flash[:notice] = "No Enrollment for the Current Year (#{@year})"
+    set_student
   end
 
   def new
@@ -57,8 +54,6 @@ class StudentsController < ApplicationController
   end
 
   private
-
-  attr_reader :year
 
   def set_student
     @student = Student.find(params[:id])
