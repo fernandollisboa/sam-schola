@@ -17,10 +17,10 @@
         <% else %>
           <% data.each do |row| %>
             <tr>
-              <td class="border px-8 py-4 w-full whitespace-nowrap"><%= "#{row.subject_name} (#{row.year})"%></td>
-              <td class="border px-8 py-4 w-full whitespace-nowrap"><%= "#{row.student_name} "%></td>
-              <td class="border px-8 py-4 w-full whitespace-nowrap"><%= "#{row.course_name} "%></td>
-              <td class="border px-8 py-4 w-full whitespace-nowrap"><%= "#{row.best_grade.truncate(2)} "%></td>
+              <td class="border px-8 py-4 w-full whitespace-nowrap">-</td>
+              <td class="border px-8 py-4 w-full whitespace-nowrap">-</td>
+              <td class="border px-8 py-4 w-full whitespace-nowrap">-</td>
+              <td class="border px-8 py-4 w-full whitespace-nowrap">-</td>
             </tr>
           <% end %>
         <% end %>
