@@ -14,20 +14,15 @@ Style/Documentation:
   Enabled: false
 
 RSpec/ExampleLength:
-  Exclude:
+  Exclude: 
     - spec/views/**/*
 
 RSpec/NestedGroups:
   Max: 5
 
 RSpec/MultipleExpectations:
-  Exclude:
+  Exclude: 
     - spec/views/**/*
 
 RSpec/MultipleMemoizedHelpers:
-  Max: 70
-Metrics/MethodLength:
-  Max: 300
-AllCops:
-  Exclude:
-  - vendor/**/*.rb # or vendor/bundle/**/*
+  Max: 7
