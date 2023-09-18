@@ -8,7 +8,6 @@ FactoryBot.define do
     trait :enrolled_in_course do
       transient do
         year { Date.current.year }
-        # course { create(:course) }
       end
 
       after(:create) do |student, evaluator|
