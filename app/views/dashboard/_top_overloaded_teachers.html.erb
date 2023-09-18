@@ -15,8 +15,8 @@
         <% else %>
           <% data.each do |row| %>
             <tr>
-              <td class="border px-8 py-4 w-full whitespace-nowrap">-</td>
-              <td class="border px-8 py-4 w-full whitespace-nowrap">-</td>
+              <td class="border px-8 py-4 w-full whitespace-nowrap"><%= "#{row.name}" %></td>
+              <td class="border px-8 py-4 w-full whitespace-nowrap"><%= "#{row.student_count}" %></td>
             </tr>
           <% end %>
         <% end %>

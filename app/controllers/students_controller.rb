@@ -1,13 +1,31 @@
 # frozen_string_literal: true
 
 class StudentsController < ApplicationController
-  before_action :set_student, only: %i[show edit update destroy]
+  before_action :set_student, only: %i[edit update destroy]
+  before_action :set_year, only: %i[index show]
 
   def index
-    @students = Student.all
+    @students = Student.select_basic_fields.enrolled_courses.by_year(year)
+
+    return unless @students.empty?
+
+    flash[:notice] = "No Enrollments for the Current Year (#{year})"
   end
 
-  def show; end
+  def show
+    @grades = FindStudentGradesAverages.call(student_id: params[:id], year: @year)
+
+    if @grades.empty?
+      flash[:notice] = "No Enrollment for the Current Year (#{year})"
+      set_student
+    else
+      enrollment = @grades.take.enrollment
+
+      @student = enrollment.student
+      @enrollment_code = enrollment.code
+      @course_name = @grades.take.course_name
+    end
+  end
 
   def new
     @student = Student.new
@@ -40,8 +58,14 @@ class StudentsController < ApplicationController
 
   private
 
+  attr_reader :year
+
   def set_student
     @student = Student.find(params[:id])
+  end
+
+  def set_year
+    @year = params[:year] || Date.current.year
   end
 
   def student_params
