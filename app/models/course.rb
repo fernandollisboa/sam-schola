@@ -11,27 +11,4 @@ class Course < ApplicationRecord
 
   has_many :teacher_assignments, dependent: :destroy
   has_many :teachers, through: :teacher_assignments
-  has_many :enrollments, dependent: :destroy
-
-  scope :select_basic_fields, lambda {
-    select(:name, :year)
-  }
-  scope :by_year, lambda { |year|
-    where(year:)
-  }
-
-  scope :enrollments, lambda {
-    joins(:enrollments)
-      .group(:name, :year)
-  }
-
-  scope :enrollments_count, lambda {
-    enrollments.select('COUNT(enrollments.code) AS enrollments_count')
-  }
-
-  scope :youngest_students, lambda {
-    joins(enrollments: :student)
-      .select('MAX(students.born_on) AS max_born_on')
-      .group(:id)
-  }
 end
