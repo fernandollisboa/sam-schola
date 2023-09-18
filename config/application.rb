@@ -20,7 +20,7 @@ Bundler.require(*Rails.groups)
 module Schola
   class Application < Rails::Application
     config.load_defaults 7.0
-    config.autoload_paths << "#{root}/lib"
+
     config.generators.system_tests = nil
   end
 end

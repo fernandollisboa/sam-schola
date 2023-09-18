@@ -109,6 +109,13 @@ RSpec.describe '/students' do
         expect(response.body).to include(course.name.to_s)
       end
 
+      it "renders the student's grade point average for the current year" do
+        get student_url(student)
+        expected_gpa = grades.pluck(:value).sum.to_f / grades.size
+
+        expect(response.body).to include(expected_gpa.truncate(2).to_s)
+      end
+
       it "renders the student's average for each subject in the current year", aggregate_failures: true do
         get "/students/#{student.id}"
 
@@ -147,6 +154,14 @@ RSpec.describe '/students' do
         get "/students/#{student.id}?year=#{year}"
 
         expect(response.body).to include(course.name.to_s)
+      end
+
+      it "renders the student's grade point average for the selected year" do
+        get "/students/#{student.id}?year=#{year}"
+
+        expected_grade_average = grades.pluck(:value).sum.to_f / grades.size
+
+        expect(response.body).to include(expected_grade_average.truncate(2).to_s)
       end
 
       it "renders the student's average for each subject in the selected year", aggregate_failures: true do
