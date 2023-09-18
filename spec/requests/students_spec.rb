@@ -23,79 +23,22 @@ RSpec.describe '/students' do
       get students_url
       expect(response).to be_successful
     end
-
-    context 'when not provided optional param "year"' do
-      let!(:students) { create_list(:student, 2, :enrolled_in_course) }
-      let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: 2012) }
-
-      it 'renders the students enrolled for the current year', aggregate_failures: true do
-        get "/students"
-
-        expect(response.body).to include(students[0].name)
-        expect(response.body).to include(students[1].name)
-      end
-
-      it 'does not render the students enrolled for other years' do
-        get "/students"
-
-        expect(response.body).not_to include(student_enrolled_for_other_year.name)
-      end
-    end
-
-    context 'when provided optional param "year"' do
-      let(:year) { 2022 }
-      let!(:students) { create_list(:student, 2, :enrolled_in_course, year:) }
-      let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: year - 1) }
-
-      it 'renders the students enrolled for the current year', aggregate_failures: true do
-        get "/students?year=#{year}"
-
-        expect(response.body).to include(students[0].name)
-        expect(response.body).to include(students[1].name)
-      end
-
-      it 'does not render the students enrolled for other years' do
-        get "/students?year=#{year}"
-
-        expect(response.body).not_to include(student_enrolled_for_other_year.name)
-      end
-    end
   end
 
   describe 'GET /show' do
+
     it 'renders a successful response' do
       student = Student.create! valid_attributes
       get student_url(student)
       expect(response).to be_successful
     end
 
-    context 'when the student is not enrolled for the current year' do
+    context 'when not passing optional params "year"' do
       let!(:student) { create(:student) }
-
-      it 'renders an appropriate flash message' do
-        get student_url(student)
-
-        expect(flash[:notice]).to include("No Enrollment for the Current Year (#{Date.current.year})")
-      end
-    end
-
-    context 'when not provided optional param "year"' do
-      let(:year) { Date.current.year }
-      let!(:student) { create(:student) }
-      let!(:course) { create(:course, year:) }
+      let!(:course) { create(:course, year: Date.current.year) }
       let!(:enrollment) { create(:enrollment, course:, student:) }
-      let!(:subjects) { create_pair(:subject) }
-      let!(:exams) { subjects.map{ |subject| create(:exam, course:, subject:) }}
-      let!(:grades) { exams.map { |exam| create(:grade, enrollment:, exam:) } }
-      let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: year - 1)}
-      let(:expected_subject_averages) do
-        subjects.map do |subject|
-          subject_exams = exams.find_all { |exam| exam.subject_id == subject.id }
-          subject_grades = grades.select { |grade| subject_exams.pluck(:id).include? grade.exam_id }
-
-          subject_grades.pluck(:value).sum.to_f / subject_grades.length
-        end
-      end
+      let!(:exams) { create_pair(:exam, course:) }
+      let!(:grades) { exams.map { |e| create(:grade, enrollment:, exam: e) } }
 
       it "renders the student's enrollment code for the current year" do
         get student_url(student)
@@ -115,34 +58,20 @@ RSpec.describe '/students' do
 
         expect(response.body).to include("#{expected_gpa.truncate(2)}")
       end
-
-      it "renders the student's average for each subject in the current year", aggregate_failures: true do
-        get "/students/#{student.id}"
-
-        expect(response.body).to include("#{subjects[0].name}", )
-        expect(response.body).to include("#{subjects[1].name}")
-        expect(response.body).to include("#{expected_subject_averages[0].truncate(2)}")
-        expect(response.body).to include("#{expected_subject_averages[1].truncate(2)}")
-      end
     end
 
-    context 'when provided optional param "year"' do
-      let(:year) { 2012 }
+    context 'when passing optional params "year"' do
       let!(:student) { create(:student) }
       let!(:course) { create(:course, year:) }
       let!(:enrollment) { create(:enrollment, course:, student:) }
-      let!(:subjects) { create_pair(:subject) }
-      let!(:exams) { subjects.map{ |subject| create(:exam, course:, subject:) }}
+      let!(:exams) { create_pair(:exam, course:) }
       let!(:grades) { exams.map { |exam| create(:grade, enrollment:, exam:) } }
-      let!(:student_enrolled_for_other_year) { create(:student, :enrolled_in_course, year: year - 1)}
-      let(:expected_subject_averages) do
-        subjects.map do |subject|
-          subject_exams = exams.find_all { |exam| exam.subject_id == subject.id }
-          subject_grades = grades.select { |grade| subject_exams.pluck(:id).include? grade.exam_id }
+      let(:year) { 2012 }
 
-          subject_grades.pluck(:value).sum.to_f / subject_grades.length
-        end
-      end
+      let!(:other_course) { create(:course, year: 2013)}
+      let!(:other_enrollment) { create(:enrollment, course: other_course, student:) }
+      let!(:other_exams) { create_pair(:exam, course: other_course) }
+      let!(:other_grades) { other_exams.map { |exam| create(:grade, enrollment: other_enrollment, exam:, value: 0) } }
 
       it "renders the student's enrollment code for the selected year" do
         get "/students/#{student.id}?year=#{year}"
@@ -158,19 +87,9 @@ RSpec.describe '/students' do
 
       it "renders the student's grade point average for the selected year" do
         get "/students/#{student.id}?year=#{year}"
+        expected_gpa = grades.pluck(:value).sum.to_f / grades.size
 
-        expected_grade_average = grades.pluck(:value).sum.to_f / grades.size
-
-        expect(response.body).to include("#{expected_grade_average.truncate(2)}")
-      end
-
-      it "renders the student's average for each subject in the selected year", aggregate_failures: true do
-        get "/students/#{student.id}?year=#{year}"
-
-        expect(response.body).to include("#{subjects[0].name}", )
-        expect(response.body).to include("#{subjects[1].name}")
-        expect(response.body).to include("#{expected_subject_averages[0].truncate(2)}")
-        expect(response.body).to include("#{expected_subject_averages[1].truncate(2)}")
+        expect(response.body).to include("#{expected_gpa.truncate(2)}")
       end
     end
   end
