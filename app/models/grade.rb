@@ -15,22 +15,13 @@ class Grade < ApplicationRecord
         'enrollments.code AS enrollment_code',
         'enrollments.code AS code',
         'student.name AS student_name',
-        'student.born_on AS student_born_on',
         'course.year',
         'AVG(grades.value) AS average',
         'course.name AS course_name'
-      ).group(
-        'course.year',
-        'subjects.name',
-        'student.name',
-        'student.born_on',
-        'enrollments.code',
-        'course.name'
-      )
+      ).group('course.year', 'subjects.name', 'student.name', 'enrollments.code', 'course.name')
   }
 
   scope :find_by_student_id, lambda { |id:|
-    joins(enrollment: :student)
-      .where(student: { id: })
+    where(student: { id: })
   }
 end
